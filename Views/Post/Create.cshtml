@@ -1,0 +1,76 @@
+@model BlogApp.Models.CreatePostViewModel
+
+@{
+    ViewData["Title"] = "Create Post";
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title">Create New Post</h2>
+
+                <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                <form asp-action="Create" method="post">
+                    <div class="mb-3">
+                        <label asp-for="Title" class="form-label">Title</label>
+                        <input asp-for="Title" class="form-control" placeholder="Enter post title..." />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Content" class="form-label">Content (Markdown)</label>
+                        <textarea asp-for="Content" class="form-control" rows="15"
+                                  placeholder="Write your post content in Markdown..."></textarea>
+                        <span asp-validation-for="Content" class="text-danger"></span>
+                        <small class="form-text text-muted">
+                            You can use Markdown syntax for formatting.
+                            <a href="https://www.markdownguide.org/basic-syntax/" target="_blank">Learn Markdown</a>
+                        </small>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Publish Post</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Markdown Help</h5>
+                <div class="small">
+                    <p><strong>Headers:</strong><br>
+                    # H1<br>
+                    ## H2<br>
+                    ### H3</p>
+
+                    <p><strong>Text formatting:</strong><br>
+                    **bold**<br>
+                    *italic*<br>
+                    `code`</p>
+
+                    <p><strong>Links:</strong><br>
+                    [link text](http://example.com)</p>
+
+                    <p><strong>Lists:</strong><br>
+                    - Item 1<br>
+                    - Item 2</p>
+
+                    <p><strong>Code blocks:</strong><br>
+                    ```<br>
+                    code here<br>
+                    ```</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

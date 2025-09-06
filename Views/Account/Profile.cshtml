@@ -1,0 +1,62 @@
+@model BlogApp.Models.User
+
+@{
+    ViewData["Title"] = "Profile";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title">User Profile</h2>
+
+                <div class="row mb-3">
+                    <div class="col-sm-3">
+                        <strong>Display Name:</strong>
+                    </div>
+                    <div class="col-sm-9">
+                        @Model.DisplayName
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-sm-3">
+                        <strong>Email:</strong>
+                    </div>
+                    <div class="col-sm-9">
+                        @Model.Email
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-sm-3">
+                        <strong>Member Since:</strong>
+                    </div>
+                    <div class="col-sm-9">
+                        @Model.CreatedAt.ToString("MMMM dd, yyyy")
+                    </div>
+                </div>
+
+                @if (Model.IsMaster)
+                {
+                    <div class="row mb-3">
+                        <div class="col-sm-3">
+                            <strong>Role:</strong>
+                        </div>
+                        <div class="col-sm-9">
+                            <span class="badge bg-primary">Blog Administrator</span>
+                        </div>
+                    </div>
+                }
+
+                <div class="mt-4">
+                    <a href="@Url.Action("Index", "Home")" class="btn btn-secondary">Back to Home</a>
+                    @if (Model.IsMaster)
+                    {
+                        <a href="@Url.Action("Create", "Post")" class="btn btn-primary ms-2">Create New Post</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,127 @@
+@model IEnumerable<BlogApp.Models.Post>
+@inject Microsoft.AspNetCore.Identity.UserManager<BlogApp.Models.User> UserManager
+
+@{
+    ViewData["Title"] = "Home";
+    var currentUser = await UserManager.GetUserAsync(User);
+    var isMaster = currentUser?.IsMaster ?? false;
+}
+
+<div class="row">
+    <div class="col-md-8">
+        @if (User.Identity.IsAuthenticated && isMaster)
+        {
+            <div class="card mb-4" style="border: 2px solid #e91e63;">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-plus-circle" style="color: #e91e63;"></i> What's on your mind?
+                    </h5>
+                    <p class="text-muted mb-3">Share your thoughts with the world...</p>
+                    <a href="@Url.Action("Create", "Post")" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Create New Post
+                    </a>
+                </div>
+            </div>
+        }
+
+        @foreach (var post in Model)
+{
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex align-items-center mb-3">
+                <div class="flex-grow-1">
+                    <h5 class="card-title mb-1">
+                        <a href="@Url.Action("Post", "Home", new { id = post.Id })" class="text-decoration-none">
+                            @post.Title
+                        </a>
+                    </h5>
+                    <small class="text-muted">
+                        by @post.User.DisplayName • @post.CreatedAt.ToString("MMM dd, yyyy")
+                    </small>
+                </div>
+            </div>
+
+            <div class="post-content mb-3">
+                @Html.Raw(post.RenderedContent.Length > 300 ?
+                    post.RenderedContent.Substring(0, 300) + "..." :
+                    post.RenderedContent)
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <button class="like-btn me-3 @(currentUser != null && post.Likes.Any(l => l.UserId == currentUser.Id) ? "liked" : "")"
+                            onclick="likePost(@post.Id)">
+                        <i class="fas fa-heart"></i> <span id="likes-@post.Id">@post.Likes.Count</span>
+                    </button>
+                    <span class="text-muted">
+                        <i class="fas fa-comment"></i> @post.Comments.Count
+                    </span>
+                </div>
+                <div class="d-flex align-items-center">
+                    <a href="@Url.Action("Post", "Home", new { id = post.Id })" class="btn btn-outline-primary btn-sm me-2" style="border-color: #e91e63; color: #e91e63;">
+                        Read More
+                    </a>
+                    @if (isMaster)
+                    {
+                        <a href="@Url.Action("Edit", "Post", new { id = post.Id })" class="btn btn-outline-secondary btn-sm me-2">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button class="btn btn-outline-danger btn-sm" onclick="deletePost(@post.Id, '@post.Title')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">About</h5>
+                <p class="card-text">Welcome to Tako's Blog where I share thoughts, ideas, and experiences.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function likePost(postId) {
+        if (!@(User.Identity.IsAuthenticated ? "true" : "false")) {
+            alert('Please login to like posts');
+            return;
+        }
+
+        $.post('@Url.Action("Like", "Post")', { id: postId }, function(data) {
+            if (data.success) {
+                location.reload();
+            }
+        });
+    }
+
+    function deletePost(postId, postTitle) {
+        if (confirm(`Are you sure you want to delete the post "${postTitle}"? This action cannot be undone.`)) {
+            var form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '@Url.Action("Delete", "Post")';
+
+            var input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'id';
+            input.value = postId;
+            form.appendChild(input);
+
+            var token = document.querySelector('input[name="__RequestVerificationToken"]');
+            if (token) {
+                form.appendChild(token.cloneNode());
+            }
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+</script>
+}

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Tako's Blog</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        .navbar-dark.bg-primary { background-color: #e91e63 !important; }
+        .btn-primary { background-color: #e91e63; border-color: #e91e63; }
+        .btn-primary:hover { background-color: #d81b60; border-color: #d81b60; }
+        .btn-primary:focus { box-shadow: 0 0 0 0.2rem rgba(233, 30, 99, 0.5); }
+        .btn-outline-primary { color: #e91e63; border-color: #e91e63; }
+        .btn-outline-primary:hover { background-color: #e91e63; border-color: #e91e63; color: white; }
+        .btn-outline-primary:focus { box-shadow: 0 0 0 0.2rem rgba(233, 30, 99, 0.5); }
+        .text-primary { color: #e91e63 !important; }
+        .link-primary { color: #e91e63; }
+        .link-primary:hover { color: #d81b60; }
+        a { color: #e91e63; }
+        a:hover { color: #d81b60; }
+        .card { border-radius: 15px; border: 1px solid #e1e8ed; margin-bottom: 20px; }
+        .card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .post-content { line-height: 1.6; }
+        .comment-tree { border-left: 2px solid #e1e8ed; padding-left: 15px; margin-left: 15px; }
+        .like-btn { border: none; background: none; color: #657786; }
+        .like-btn.liked { color: #e0245e; }
+        .comment-form { margin-top: 15px; }
+        .reply-form { margin-top: 10px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="@Url.Action("Index", "Home")">
+                Tako's Blog
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="navbar-nav ms-auto">
+                    <partial name="_LoginPartial" />
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                @TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        <main role="main" class="pb-3">
+            @Html.AntiForgeryToken()
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

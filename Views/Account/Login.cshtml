@@ -1,0 +1,41 @@
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title text-center mb-4">Login to Tako's Blog</h2>
+
+                <form method="post">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Login</button>
+                    </div>
+
+                    @Html.AntiForgeryToken()
+                </form>
+
+                <div class="text-center mt-3">
+                    <p>Don't have an account? <a href="@Url.Action("Register", "Account")">Register here</a></p>
+                </div>
+
+                <div class="mt-4 p-3 bg-light rounded">
+                    <h6>Demo Account:</h6>
+                    <p class="mb-1"><strong>Email:</strong> admin@blog.com</p>
+                    <p class="mb-0"><strong>Password:</strong> Admin123!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

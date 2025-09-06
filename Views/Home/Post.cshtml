@@ -1,0 +1,168 @@
+@model BlogApp.Models.Post
+@inject Microsoft.AspNetCore.Identity.UserManager<BlogApp.Models.User> UserManager
+
+@{
+    ViewData["Title"] = Model.Title;
+    var currentUser = await UserManager.GetUserAsync(User);
+    var isMaster = currentUser?.IsMaster ?? false;
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h1 class="card-title">@Model.Title</h1>
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <small class="text-muted">
+                        by @Model.User.DisplayName • @Model.CreatedAt.ToString("MMMM dd, yyyy 'at' HH:mm")
+                    </small>
+                    @if (isMaster)
+                    {
+                        <a href="@Url.Action("Edit", "Post", new { id = Model.Id })" class="btn btn-outline-secondary btn-sm me-2">
+                            <i class="fas fa-edit"></i> Edit Post
+                        </a>
+                        <button class="btn btn-outline-danger btn-sm" onclick="deletePost(@Model.Id, '@Model.Title')">
+                            <i class="fas fa-trash"></i> Delete Post
+                        </button>
+                    }
+                </div>
+
+                <div class="post-content">
+                    @Html.Raw(Model.RenderedContent)
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                    <div>
+                        <button class="like-btn @(currentUser != null && Model.Likes.Any(l => l.UserId == currentUser.Id) ? "liked" : "")"
+                                onclick="likePost(@Model.Id)">
+                            <i class="fas fa-heart"></i> <span id="likes-@Model.Id">@Model.Likes.Count</span>
+                        </button>
+                        <span class="ms-3 text-muted">
+                            <i class="fas fa-comment"></i> @Model.Comments.Count comments
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comments Section -->
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Comments</h5>
+
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <div class="comment-form">
+                        <div class="mb-3">
+                            <textarea class="form-control" id="commentContent" rows="3" placeholder="Write a comment..."></textarea>
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="addComment(@Model.Id)">
+                            Post Comment
+                        </button>
+                    </div>
+                }
+
+                <div id="comments-list" class="mt-4">
+                    @foreach (var comment in Model.Comments.Where(c => c.ParentCommentId == null).OrderBy(c => c.CreatedAt))
+                    {
+                        @await Html.PartialAsync("_Comment", comment)
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">About This Post</h5>
+                <p class="card-text">
+                    <small class="text-muted">
+                        Created: @Model.CreatedAt.ToString("MMMM dd, yyyy")<br>
+                        @if (Model.UpdatedAt != Model.CreatedAt)
+                        {
+                            <span>Updated: @Model.UpdatedAt.ToString("MMMM dd, yyyy")</span>
+                        }
+                    </small>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function likePost(postId) {
+        if (!@(User.Identity.IsAuthenticated ? "true" : "false")) {
+            alert('Please login to like posts');
+            return;
+        }
+
+        $.post('@Url.Action("Like", "Post")', { id: postId }, function(data) {
+            if (data.success) {
+                location.reload();
+            }
+        });
+    }
+
+    function addComment(postId, parentCommentId = null) {
+        var content = parentCommentId ?
+            $('#reply-content-' + parentCommentId).val() :
+            $('#commentContent').val();
+
+        if (!content.trim()) {
+            alert('Please enter a comment');
+            return;
+        }
+
+        $.post('@Url.Action("Add", "Comment")', {
+            postId: postId,
+            content: content,
+            parentCommentId: parentCommentId
+        }, function(data) {
+            if (data.success) {
+                location.reload();
+            }
+        });
+    }
+
+    function likeComment(commentId) {
+        if (!@(User.Identity.IsAuthenticated ? "true" : "false")) {
+            alert('Please login to like comments');
+            return;
+        }
+
+        $.post('@Url.Action("Like", "Comment")', { id: commentId }, function(data) {
+            if (data.success) {
+                location.reload();
+            }
+        });
+    }
+
+    function toggleReply(commentId) {
+        $('#reply-form-' + commentId).toggle();
+    }
+
+    function deletePost(postId, postTitle) {
+        if (confirm(`Are you sure you want to delete the post "${postTitle}"? This action cannot be undone.`)) {
+            var form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '@Url.Action("Delete", "Post")';
+
+            var input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'id';
+            input.value = postId;
+            form.appendChild(input);
+
+            var token = document.querySelector('input[name="__RequestVerificationToken"]');
+            if (token) {
+                form.appendChild(token.cloneNode());
+            }
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+</script>
+}

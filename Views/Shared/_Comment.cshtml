@@ -1,0 +1,52 @@
+@model BlogApp.Models.Comment
+@inject Microsoft.AspNetCore.Identity.UserManager<BlogApp.Models.User> UserManager
+
+@{
+    var currentUser = await UserManager.GetUserAsync(User);
+}
+
+<div class="mb-3">
+    <div class="d-flex align-items-start">
+        <div class="flex-grow-1">
+            <div class="d-flex align-items-center mb-2">
+                <strong class="me-2">@Model.User.DisplayName</strong>
+                <small class="text-muted">@Model.CreatedAt.ToString("MMM dd, yyyy HH:mm")</small>
+            </div>
+            <p class="mb-2">@Model.Content</p>
+            <div class="d-flex align-items-center">
+                <button class="like-btn me-3 @(currentUser != null && Model.Likes.Any(l => l.UserId == currentUser.Id) ? "liked" : "")"
+                        onclick="likeComment(@Model.Id)">
+                    <i class="fas fa-heart"></i> @Model.Likes.Count
+                </button>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <button class="btn btn-link btn-sm p-0" onclick="toggleReply(@Model.Id)">
+                        Reply
+                    </button>
+                }
+            </div>
+
+            @if (User.Identity.IsAuthenticated)
+            {
+                <div id="reply-form-@Model.Id" class="reply-form" style="display: none;">
+                    <div class="mb-2">
+                        <textarea class="form-control" id="reply-content-@Model.Id" rows="2" placeholder="Write a reply..."></textarea>
+                    </div>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="addComment(@Model.PostId, @Model.Id)">
+                        Reply
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+
+    @if (Model.Replies.Any())
+    {
+        <div class="comment-tree mt-3">
+            @foreach (var reply in Model.Replies.OrderBy(r => r.CreatedAt))
+            {
+                @await Html.PartialAsync("_Comment", reply)
+            }
+        </div>
+    }
+</div>
